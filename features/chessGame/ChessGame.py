@@ -59,7 +59,7 @@ class ChessGame(State):
                     return
                 mouseLocation = pygame.mouse.get_pos()
                 self.handleMouseClick(mouseLocation)
-                
+        
         if (not self.humanTurn and not (self.gameState.status == Status.CHECKMATE or self.gameState.status == Status.STALEMATE) ): 
             self.AIMoveWithProcess()
 
@@ -108,7 +108,6 @@ class ChessGame(State):
             if (len(validMoves) != 0):
                 self.AIProcess = Process(target = self.chessAI.generateMoveWithQueue, args = (self.gameState, validMoves, self.returnMoveQueue))
                 self.AIProcess.start()
-                print("After Start")
             else:
                 return
         
@@ -207,8 +206,12 @@ class ChessGame(State):
         self.moveToHighlight = []
 
     def reset(self):
+        self.stopAIProcess()
+
         self.gameState.reset()
         self.clearSelected()
+
+        self.humanTurn = (self.gameState.whiteTurn and self.isPlayerOneHuman) or (not self.gameState.whiteTurn and self.isPlayerTwoHuman)
 
 # def main():
 #     SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))

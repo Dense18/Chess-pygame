@@ -12,7 +12,9 @@ class ChessUI:
         self.IMAGES = {}
         self.loadImages()
 
-        self.moveLogBorder = 0
+        self.moveLogTopBorder = 0
+        self.moveLogLeftBorder = 2
+
         self.moveLogTopPadding = 3
         self.moveLogNotationSpacing = 5
 
@@ -97,13 +99,17 @@ class ChessUI:
             self.screen.blit(movedSquare, (lastMove.startCol * SQUARE_SIZE, lastMove.startRow * SQUARE_SIZE))
             self.screen.blit(movedSquare, (lastMove.endCol * SQUARE_SIZE, lastMove.endRow * SQUARE_SIZE))
 
-    def drawGameState(self, squareToHighlight, showHighlight = False, moveToHighlight = None, moveLog = [], update = True):
+    def drawGameState(self, squareToHighlight, 
+                      showHighlight = False, moveToHighlight = None, moveLog = [], update = True,
+                      drawGameOverText = True):
         self.drawBoard()
         self.drawLastMoveHighlight()
         if (showHighlight): self.drawHighlight(squareToHighlight, moveToHighlight)
         self.drawPieces()
+
+        if (drawGameOverText): self.drawGameOverText()
         self.drawMoveLog(moveLog)
-        self.drawGameOverText()
+        
         if update: pygame.display.update()
         
     def animateMove(self, move, squareSelected): #TODO: Try to only draw the portion/section that is changed, and not the entire section
@@ -116,7 +122,7 @@ class ChessUI:
         frameCount = max(11, (abs(dRow) + abs(dCol)) * framePerSquare)
         for frame in range(frameCount + 1):
             col, row = (move.startCol + (dCol * frame/frameCount)), (move.startRow + (dRow * frame/frameCount))
-            self.drawGameState(squareSelected, showHighlight=False, update = False)
+            self.drawGameState(squareSelected, showHighlight=False, update = False, drawGameOverText = False)
 
             # Erase the captured piece to prevent having two exact same piece in the screen
             endSquare = pygame.Rect(move.endCol * SQUARE_SIZE, move.endRow * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
@@ -135,7 +141,7 @@ class ChessUI:
             self.clock.tick(60)
        
     def drawMoveLog(self, moveLog = []):
-        moveLogRect = pygame.Rect(BOARD_WIDTH + self.moveLogBorder, 0 + self.moveLogBorder, MOVELOG_WIDTH, BOARD_HEIGHT)
+        moveLogRect = pygame.Rect(BOARD_WIDTH - self.moveLogLeftBorder, 0 + self.moveLogTopBorder, MOVELOG_WIDTH, BOARD_HEIGHT)
         pygame.draw.rect(self.screen, self.moveLogBackgroundColor, moveLogRect)
 
         textY = self.moveLogTopPadding + self.textMoveSize
@@ -148,7 +154,7 @@ class ChessUI:
                 chessNotationText += " " + moveLog[i + 1].getChessNotation()
             if ( i % (self.movePerRow * 2) == 0):
                 moveLogRect.y = moveLogRect.y + textY
-                moveLogRect.x = BOARD_WIDTH + self.moveLogBorder
+                moveLogRect.x = BOARD_WIDTH + self.textSpacing
             else:
                 if (j % 2 == 1 and j != 1):
                     moveLogRect.move_ip(moveLogTextObj.get_width() + self.moveLogNotationSpacing, 0)
@@ -162,8 +168,7 @@ class ChessUI:
         if self.gameState.status != Status.CHECKMATE and self.gameState.status != Status.STALEMATE:
             return
         
-
-        rectWidth = 200
+        rectWidth = 150
         rectHeight = 100
         rectX = self.screen.get_width()//2 - rectWidth//2
         rectY = self.screen.get_height()//2 - rectHeight//2

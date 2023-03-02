@@ -120,7 +120,8 @@ class ChessUI:
         dCol = move.endCol - move.startCol
 
         framePerSquare = 0.13 / deltaTime
-        frameCount = int (min(2.5 * framePerSquare, (abs(dRow) + abs(dCol)) * framePerSquare))
+        # frameCount = int (min(2.5 * framePerSquare, (abs(dRow) + abs(dCol)) * framePerSquare))
+        frameCount = int ( (max(abs(dRow), abs(dCol))) * framePerSquare )
 
         for frame in range(frameCount + 1):
             col, row = (move.startCol + (dCol * frame/frameCount)), (move.startRow + (dRow * frame/frameCount))

@@ -10,6 +10,7 @@ from AI.ChessAI import ChessAI
 from domain.chess.Piece import *
 from features.State import State
 from multiprocessing import Process, Queue
+import os
 
 class ChessGame(State):    
     def __init__(self, game, isPlayerTwoHuman = True):
@@ -34,6 +35,9 @@ class ChessGame(State):
         self.isPlayerOneHuman = True
         self.isPlayerTwoHuman = isPlayerTwoHuman
         self.humanTurn = True
+
+        self.moveSound = pygame.mixer.Sound(os.path.join("Asset\\Sounds", "Move.ogg"))
+        self.captureSound = pygame.mixer.Sound(os.path.join("Asset\\Sounds", "Capture.ogg"))
     
     ### 
     def draw(self, surface):
@@ -61,7 +65,7 @@ class ChessGame(State):
                 self.handleMouseClick(mouseLocation, deltaTime)
         
         if (not self.humanTurn and not (self.gameState.status == Status.CHECKMATE or self.gameState.status == Status.STALEMATE) ): 
-            self.AIMoveWithProcess()
+            self.AIMoveWithProcess(deltaTime)
 
     ####
     def run(self):
@@ -99,7 +103,7 @@ class ChessGame(State):
             self.AIProcess.terminate()
         self.isAIInProgress = False
 
-    def AIMoveWithProcess(self):
+    def AIMoveWithProcess(self, deltaTime):
         # returnQueue = Queue()
         if not self.isAIInProgress:
             self.isAIInProgress = True
@@ -116,15 +120,16 @@ class ChessGame(State):
             move = self.returnMoveQueue.get()
             self.gameState.performMove(move)
             if (len(self.gameState.moveLog)): 
-                self.chessUI.animateMove(self.gameState.moveLog[-1], self.squareSelected)
+                self.performLastMoveEffects(deltaTime)
             self.isAIInProgress = False
             
-    def AIMove(self):
+    def AIMove(self, deltaTime):
         self.isAIInProgress = True
         validMoves = self.gameState.getAllValidMoves(self.gameState.whiteTurn)
         if (len(validMoves) != 0):
             self.gameState.performMove(self.chessAI.generateMove(self.gameState, validMoves))
-            if (len(self.gameState.moveLog)): self.chessUI.animateMove(self.gameState.moveLog[-1], self.squareSelected)
+            if (len(self.gameState.moveLog)): 
+                self.performLastMoveEffects(deltaTime)
         self.isAIInProgress = False
     
     """
@@ -186,7 +191,7 @@ class ChessGame(State):
                 isMoveSuccessful = self.gameState.movePiece(self.playerClick[0], self.playerClick[1], pp)
 
                 if (len(self.gameState.moveLog) != 0 and isMoveSuccessful): 
-                    self.chessUI.animateMove(self.gameState.moveLog[-1], self.squareSelected, deltaTime)
+                    self.performLastMoveEffects(deltaTime)
                     
             ## Reselect piece regardless of current turn color
             # if not isMoveSuccessful and self.gameState.board[self.playerClick[1][0]][self.playerClick[1][1]] != "--":
@@ -210,6 +215,24 @@ class ChessGame(State):
 
         self.humanTurn = (self.gameState.whiteTurn and self.isPlayerOneHuman) or (not self.gameState.whiteTurn and self.isPlayerTwoHuman)
 
+    
+    """
+        Sound functions
+    """
+
+    def performLastMoveEffects(self, deltaTime):
+        """
+            Peform Animation and Sound effects on the last move played
+        """
+        self.chessUI.animateMove(self.gameState.moveLog[-1], self.squareSelected, deltaTime)
+        self.playSound()
+
+    def playSound(self):
+        lastMove = self.gameState.moveLog[-1] if len(self.gameState.moveLog) else None
+        if (not lastMove): return
+
+        if lastMove.pieceCaptured == "--" : self.moveSound.play()
+        else: self.captureSound.play()
 # def main():
 #     SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 #     game = ChessGame(SCREEN, SQUARE_SIZE)

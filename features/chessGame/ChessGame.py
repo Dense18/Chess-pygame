@@ -58,7 +58,7 @@ class ChessGame(State):
                     self.undoAction()
                     return
                 mouseLocation = pygame.mouse.get_pos()
-                self.handleMouseClick(mouseLocation)
+                self.handleMouseClick(mouseLocation, deltaTime)
         
         if (not self.humanTurn and not (self.gameState.status == Status.CHECKMATE or self.gameState.status == Status.STALEMATE) ): 
             self.AIMoveWithProcess()
@@ -141,7 +141,7 @@ class ChessGame(State):
             self.gameState.undoMove() # undo Move twice if the opponent is an AI
         self.clearSelected()
         
-    def handleMouseClick(self, mouseLocation):
+    def handleMouseClick(self, mouseLocation, deltaTime):
         col = mouseLocation[0] // SQUARE_SIZE
         row = mouseLocation[1] // SQUARE_SIZE 
 
@@ -167,10 +167,7 @@ class ChessGame(State):
             self.playerClick.append((row,col))
          
         #Move chess piece
-        if len(self.playerClick) == 2:
-            # startRow = self.playerClick[0][0]
-            # startCol = self.playerClick[0][1]
-            
+        if len(self.playerClick) == 2:            
             if self.gameState.board[row][col][0] == self.gameState.currentPieceTurn(): #reselect piece
                 self.playerClick = [self.squareSelected]
                 selectedPiece = self.gameState.board[row][col]
@@ -189,7 +186,7 @@ class ChessGame(State):
                 isMoveSuccessful = self.gameState.movePiece(self.playerClick[0], self.playerClick[1], pp)
 
                 if (len(self.gameState.moveLog) != 0 and isMoveSuccessful): 
-                    self.chessUI.animateMove(self.gameState.moveLog[-1], self.squareSelected)
+                    self.chessUI.animateMove(self.gameState.moveLog[-1], self.squareSelected, deltaTime)
                     
             ## Reselect piece regardless of current turn color
             # if not isMoveSuccessful and self.gameState.board[self.playerClick[1][0]][self.playerClick[1][1]] != "--":

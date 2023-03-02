@@ -1,6 +1,7 @@
 from settings import *
 import pygame
 import os
+import time
 from domain.chess.Status import Status
 class ChessUI:
     def __init__(self, gamestate, screen):
@@ -112,14 +113,15 @@ class ChessUI:
         
         if update: pygame.display.update()
         
-    def animateMove(self, move, squareSelected): #TODO: Try to only draw the portion/section that is changed, and not the entire section
+    def animateMove(self, move, squareSelected, deltaTime): #TODO: Try to only draw the portion/section that is changed, and not the entire section
         if move == None: return
 
         dRow = move.endRow - move.startRow
         dCol = move.endCol - move.startCol
 
-        framePerSquare = 3
-        frameCount = max(11, (abs(dRow) + abs(dCol)) * framePerSquare)
+        framePerSquare = 0.13 / deltaTime
+        frameCount = int (min(2.5 * framePerSquare, (abs(dRow) + abs(dCol)) * framePerSquare))
+
         for frame in range(frameCount + 1):
             col, row = (move.startCol + (dCol * frame/frameCount)), (move.startRow + (dRow * frame/frameCount))
             self.drawGameState(squareSelected, showHighlight=False, update = False, drawGameOverText = False)
@@ -138,7 +140,6 @@ class ChessUI:
             self.screen.blit(self.IMAGES[move.pieceMoved], pygame.Rect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
             pygame.display.update((0,0, BOARD_WIDTH, BOARD_HEIGHT))
-            self.clock.tick(60)
        
     def drawMoveLog(self, moveLog = []):
         moveLogRect = pygame.Rect(BOARD_WIDTH - self.moveLogLeftBorder, 0 + self.moveLogTopBorder, MOVELOG_WIDTH, BOARD_HEIGHT)

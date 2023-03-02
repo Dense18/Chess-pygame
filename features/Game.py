@@ -39,7 +39,7 @@ class Game(Subject):
     
     def getDt(self):
         now = time.time()
-        self.dt = now - self.dt
+        self.dt = now - self.prevTime
         self.prevTime = now
 
     def loadInitialState(self):

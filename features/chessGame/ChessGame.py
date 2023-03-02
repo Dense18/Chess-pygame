@@ -104,7 +104,6 @@ class ChessGame(State):
         self.isAIInProgress = False
 
     def AIMoveWithProcess(self, deltaTime):
-        # returnQueue = Queue()
         if not self.isAIInProgress:
             self.isAIInProgress = True
             print("Thinking...")

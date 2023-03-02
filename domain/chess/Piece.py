@@ -1,5 +1,7 @@
 import domain.chess.ChessEngine as ChessEngine
 from typing import Tuple
+from domain.chess.Move import Move
+
 class Piece:
     def __init__(self, gamestate, isWhite = True):
         self.gamestate = gamestate
@@ -25,17 +27,17 @@ class Pawn(Piece):
 
         if (0 <= row + incr[allyPiece] <= 7):
             if board[row + incr[allyPiece]][col] == "--":
-                possibleMoves.append(ChessEngine.Move((row, col), (row + incr[allyPiece], col), board))
+                possibleMoves.append(Move((row, col), (row + incr[allyPiece], col), board))
 
         if 0 <= row + 2 * incr[allyPiece]<= 7: # Might be uneccesaery
             if (row == 6 and allyPiece == "w") or (row == 1 and allyPiece == "b"):
                 if board[row + incr[allyPiece]][col] == "--" and board[row + 2 * incr[allyPiece]][col] == "--":
-                    possibleMoves.append(ChessEngine.Move((row, col), (row + 2 * incr[allyPiece], col), board))
+                    possibleMoves.append(Move((row, col), (row + 2 * incr[allyPiece], col), board))
 
         for i in offsets:
             if (0 <= row + incr[allyPiece] <= 7 and 0 <= col + i <= 7):
                 if (board[row + incr[allyPiece]][col + i][0] == enemyPiece): 
-                    possibleMoves.append(ChessEngine.Move((row, col), (row + incr[allyPiece], col + i), board))
+                    possibleMoves.append(Move((row, col), (row + incr[allyPiece], col + i), board))
                 elif board[row + incr[allyPiece]][col + i] == "--" and (row + incr[allyPiece], col + i) == self.enPassantSquare:   
                     #TODO: If enpassantsquare, then it should be empty, so the first condition might not be needed to reduce computational cost          
                     possibleMoves.append(ChessEngine.Move((row, col), (row + incr[allyPiece], col + i), board, None, isEnPassant = True))
@@ -62,10 +64,10 @@ class Rook(Piece):
                 if ( 0 <= endRow <= 7 and 0 <= endCol <= 7 ):
                     endPiece = board[endRow][endCol]
                     if endPiece == "--": 
-                        possibleMoves.append(ChessEngine.Move((row, col), (endRow, endCol), board))
+                        possibleMoves.append(Move((row, col), (endRow, endCol), board))
                         i += 1
                     elif endPiece[0] == enemypiece : 
-                        possibleMoves.append(ChessEngine.Move((row, col), (endRow, endCol), board))
+                        possibleMoves.append(Move((row, col), (endRow, endCol), board))
                         break
                     else: break
                 else: break
@@ -91,7 +93,7 @@ class Knight(Piece):
             endCol = col + move[1]
             if (0 <= endRow <= 7 and 0 <= endCol <= 7 ): 
                 endPiece = board[endRow][endCol]
-                if (endPiece[0] != allyPiece): possibleMoves.append(ChessEngine.Move((row,col), (endRow, endCol), board))
+                if (endPiece[0] != allyPiece): possibleMoves.append(Move((row,col), (endRow, endCol), board))
         return possibleMoves
 
 class Bishop(Piece):
@@ -143,17 +145,5 @@ class King(Piece):
             endCol = col + move[1]
             if (0 <= endRow <= 7 and 0 <= endCol <= 7):
                 endPiece = board[endRow][endCol]
-                if (endPiece[0] != allyPiece): possibleMoves.append(ChessEngine.Move((row, col), (endRow, endCol), board))
+                if (endPiece[0] != allyPiece): possibleMoves.append(Move((row, col), (endRow, endCol), board))
         return possibleMoves
-
-class PieceFactory():
-    @staticmethod
-    def __init__(self, gamestate) -> None:
-        pass
-    def createPiece(type):
-        if (type == "p"): return Pawn()
-        elif (type == "r"): return Rook()
-        elif (type == "n"): return Knight()
-        elif (type == "b"): return Bishop()
-        elif (type == "q"): return Queen()
-        elif (type == "k"): return King()

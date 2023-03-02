@@ -118,10 +118,13 @@ class ChessUI:
 
         dRow = move.endRow - move.startRow
         dCol = move.endCol - move.startCol
-
-        framePerSquare = 0.13 / deltaTime
-        # frameCount = int (min(2.5 * framePerSquare, (abs(dRow) + abs(dCol)) * framePerSquare))
-        frameCount = int ( (max(abs(dRow), abs(dCol))) * framePerSquare )
+        
+        # """ When using delatime"""
+        # framePerSquare = 0.13 / deltaTime
+        # frameCount = int ( (max(abs(dRow), abs(dCol))) * framePerSquare )
+        
+        framePerSquare = 3
+        frameCount = max(15, (abs(dRow) + abs(dCol)) * framePerSquare)
 
         for frame in range(frameCount + 1):
             col, row = (move.startCol + (dCol * frame/frameCount)), (move.startRow + (dRow * frame/frameCount))
@@ -141,6 +144,7 @@ class ChessUI:
             self.screen.blit(self.IMAGES[move.pieceMoved], pygame.Rect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
             pygame.display.update((0,0, BOARD_WIDTH, BOARD_HEIGHT))
+            self.clock.tick(60)
        
     def drawMoveLog(self, moveLog = []):
         moveLogRect = pygame.Rect(BOARD_WIDTH - self.moveLogLeftBorder, 0 + self.moveLogTopBorder, MOVELOG_WIDTH, BOARD_HEIGHT)
@@ -205,7 +209,7 @@ class ChessUI:
     #         moveLogRect.move_ip(0, textY)
     #         self.screen.blit(moveLogTextObj, moveLogRect)
 
-    ## Should only be initialized once during creation of class
+    # # Should only be initialized once during creation of class
     def loadImages(self):
         """
             Loads required images for the chess piece

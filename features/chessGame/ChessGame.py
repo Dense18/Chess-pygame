@@ -13,6 +13,9 @@ from multiprocessing import Process, Queue
 import os
 
 class ChessGame(State):    
+    """
+        Class to run the game of Chess
+    """
     def __init__(self, game, isPlayerTwoHuman = True):
         State.__init__(self, game)
         # pygame.init()
@@ -39,7 +42,6 @@ class ChessGame(State):
         self.moveSound = pygame.mixer.Sound(os.path.join("Asset\\Sounds", "Move.ogg"))
         self.captureSound = pygame.mixer.Sound(os.path.join("Asset\\Sounds", "Capture.ogg"))
     
-    ### 
     def draw(self, surface):
         self.chessUI.drawGameState(squareToHighlight=self.squareSelected, 
                                        showHighlight = True, moveToHighlight = self.moveToHighlight,
@@ -66,34 +68,6 @@ class ChessGame(State):
         
         if (not self.humanTurn and not (self.gameState.status == Status.CHECKMATE or self.gameState.status == Status.STALEMATE) ): 
             self.AIMoveWithProcess(deltaTime)
-
-    ####
-    def run(self):
-        while (self.isRunning):
-            self.humanTurn = (self.gameState.whiteTurn and self.isPlayerOneHuman) or (not self.gameState.whiteTurn and self.isPlayerTwoHuman)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.isRunning = False
-                
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_r:
-                        self.reset()
-
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 3: 
-                        self.undoAction()
-                    mouseLocation = pygame.mouse.get_pos()
-                    self.handleMouseClick(mouseLocation)
-            
-            if (not self.humanTurn): 
-                self.AIMove()
-
-            self.checkStatus()
-            # self.chessUI.drawGameState(squareToHighlight=self.squareSelected, 
-            #                            showHighlight = True, moveToHighlight = self.moveToHighlight,
-            #                            moveLog = self.gameState.moveLog)
-            self.draw(None)
-            self.clock.tick(MAX_FPS)
 
     """
         A.I functions
@@ -132,7 +106,7 @@ class ChessGame(State):
         self.isAIInProgress = False
     
     """
-        Main function
+        Main functions
     """
     def undoAction(self):
         self.gameState.undoMove()
@@ -216,7 +190,7 @@ class ChessGame(State):
 
     
     """
-        Sound functions
+        Effects functions
     """
 
     def performLastMoveEffects(self, deltaTime):
@@ -227,16 +201,12 @@ class ChessGame(State):
         self.playSound()
 
     def playSound(self):
+        """
+            Peform Sound effects on the last move played
+        """
         lastMove = self.gameState.moveLog[-1] if len(self.gameState.moveLog) else None
         if (not lastMove): return
 
         if lastMove.pieceCaptured == "--" : self.moveSound.play()
         else: self.captureSound.play()
-# def main():
-#     SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-#     game = ChessGame(SCREEN, SQUARE_SIZE)
-#     game.run()
-
-# if __name__ == "__main__":
-#     main()
 

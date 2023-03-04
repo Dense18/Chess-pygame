@@ -7,6 +7,7 @@ def main():
     while game.running:
         game.loop()
 
+    ## Exiting the program
     print("Exiting game....")
     pygame.quit()
     sys.exit()

@@ -5,6 +5,10 @@ from features.chessGame.ChessGame import ChessGame
 from ui.widget.AnimatedButton import AnimatedButton
 
 class Menu(State):
+    """
+        Menu State of the program. 
+        Contains the VsPlayer, VSComputer, and Quit options
+    """
     def __init__(self, game, screen):
         super().__init__(game)
         self.buttonWidth = 300

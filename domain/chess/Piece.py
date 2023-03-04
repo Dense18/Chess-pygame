@@ -3,6 +3,9 @@ from typing import Tuple
 from domain.chess.Move import Move
 
 class Piece:
+    """
+        Base structure for the chess Pieces
+    """
     def __init__(self, gamestate, isWhite = True):
         self.gamestate = gamestate
         self.isWhite = isWhite

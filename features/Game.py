@@ -6,6 +6,9 @@ from features.menu.Menu import Menu
 from Subject import Subject
 
 class Game(Subject):
+    """
+        Main Class File in which the whole system runs
+    """
     def __init__(self) -> None:
         pygame.init()
         self.running = True

@@ -1,6 +1,9 @@
 from Subject import Subject
 
 class State(Subject):
+    """
+        Abstract Interface of each State of the Game
+    """
     def __init__(self, game):
         self.game = game
         self.prevState = None

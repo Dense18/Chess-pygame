@@ -3,7 +3,11 @@ import pygame
 import os
 import time
 from domain.chess.Status import Status
+
 class ChessUI:
+    """
+        UI class handling all the UI materials for the chess game 
+    """
     def __init__(self, gamestate, screen):
         # pygame.init()
         # pygame.display.set_caption("Chess")
@@ -30,13 +34,14 @@ class ChessUI:
         self.textSpacing = 3  
         self.movePerRow = 3
 
+        #Clock is needed for Animation
         self.clock = pygame.time.Clock()
+
         self.rankToRow = {"1": 7, "2": 6, "3": 5, "4": 4, "5": 3, "6": 2, "7": 1, "8": 0}
         self.rowToRank = {value: key for key, value in self.rankToRow.items()}
 
         self.fileToCol = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
         self.colToFile = {value: key for key, value in self.fileToCol.items()}
-        pass
 
     def drawPieces(self):
         for row in range(DIMENSION):
@@ -113,7 +118,52 @@ class ChessUI:
         
         if update: pygame.display.update()
         
-    def animateMove(self, move, squareSelected, deltaTime): #TODO: Try to only draw the portion/section that is changed, and not the entire section
+    def drawGameOverText(self):
+        if self.gameState.status != Status.CHECKMATE and self.gameState.status != Status.STALEMATE:
+            return
+        
+        rectWidth = 150
+        rectHeight = 100
+        rectX = self.screen.get_width()//2 - rectWidth//2
+        rectY = self.screen.get_height()//2 - rectHeight//2
+        rect = pygame.Rect(rectX, rectY, rectWidth, rectHeight)
+
+        text = "CheckMate" if self.gameState.status == Status.CHECKMATE else "StaleMate"
+        textObj = self.textNotationFont.render(text, 1, (255, 255, 255))
+        textRect = textObj.get_rect(center = rect.center)
+
+        pygame.draw.rect(self.screen, (100,100,100), rect)
+        self.screen.blit(textObj, textRect)
+
+    def drawMoveLog(self, moveLog = []):
+        moveLogRect = pygame.Rect(BOARD_WIDTH - self.moveLogLeftBorder, 0 + self.moveLogTopBorder, MOVELOG_WIDTH, BOARD_HEIGHT)
+        pygame.draw.rect(self.screen, self.moveLogBackgroundColor, moveLogRect)
+
+        textY = self.moveLogTopPadding + self.textMoveSize
+        j = 0
+        for i in range(0, len(moveLog), 2):
+            j += 1
+            chessNotationText = moveLog[i].getChessNotation()
+            if i + 1 < len(moveLog): 
+                j += 1
+                chessNotationText += " " + moveLog[i + 1].getChessNotation()
+            if ( i % (self.movePerRow * 2) == 0):
+                moveLogRect.y = moveLogRect.y + textY
+                moveLogRect.x = BOARD_WIDTH + self.textSpacing
+            else:
+                if (j % 2 == 1 and j != 1):
+                    moveLogRect.move_ip(moveLogTextObj.get_width() + self.moveLogNotationSpacing, 0)
+                if (j % 2 == 0 and j >= 3):
+                    moveLogRect.move_ip(moveLogTextObj.get_width() + self.moveLogNotationSpacing, 0)
+
+            moveLogTextObj = self.textMoveFont.render(f"{i//2 + 1}. {chessNotationText}", 1, pygame.Color("White"))
+            self.screen.blit(moveLogTextObj, moveLogRect)
+
+
+    def animateMove(self, move, squareSelected, deltaTime): 
+        """
+            Perform animation of the last move plaved
+        """
         if move == None: return
 
         dRow = move.endRow - move.startRow
@@ -146,70 +196,7 @@ class ChessUI:
             pygame.display.update((0,0, BOARD_WIDTH, BOARD_HEIGHT))
             self.clock.tick(60)
        
-    def drawMoveLog(self, moveLog = []):
-        moveLogRect = pygame.Rect(BOARD_WIDTH - self.moveLogLeftBorder, 0 + self.moveLogTopBorder, MOVELOG_WIDTH, BOARD_HEIGHT)
-        pygame.draw.rect(self.screen, self.moveLogBackgroundColor, moveLogRect)
-
-        textY = self.moveLogTopPadding + self.textMoveSize
-        j = 0
-        for i in range(0, len(moveLog), 2):
-            j += 1
-            chessNotationText = moveLog[i].getChessNotation()
-            if i + 1 < len(moveLog): 
-                j += 1
-                chessNotationText += " " + moveLog[i + 1].getChessNotation()
-            if ( i % (self.movePerRow * 2) == 0):
-                moveLogRect.y = moveLogRect.y + textY
-                moveLogRect.x = BOARD_WIDTH + self.textSpacing
-            else:
-                if (j % 2 == 1 and j != 1):
-                    moveLogRect.move_ip(moveLogTextObj.get_width() + self.moveLogNotationSpacing, 0)
-                if (j % 2 == 0 and j >= 3):
-                    moveLogRect.move_ip(moveLogTextObj.get_width() + self.moveLogNotationSpacing, 0)
-
-            moveLogTextObj = self.textMoveFont.render(f"{i//2 + 1}. {chessNotationText}", 1, pygame.Color("White"))
-            self.screen.blit(moveLogTextObj, moveLogRect)
-
-    def drawGameOverText(self):
-        if self.gameState.status != Status.CHECKMATE and self.gameState.status != Status.STALEMATE:
-            return
-        
-        rectWidth = 150
-        rectHeight = 100
-        rectX = self.screen.get_width()//2 - rectWidth//2
-        rectY = self.screen.get_height()//2 - rectHeight//2
-        rect = pygame.Rect(rectX, rectY, rectWidth, rectHeight)
-
-        text = "CheckMate" if self.gameState.status == Status.CHECKMATE else "StaleMate"
-        textObj = self.textNotationFont.render(text, 1, (255, 255, 255))
-        textRect = textObj.get_rect(center = rect.center)
-
-        pygame.draw.rect(self.screen, (100,100,100), rect)
-        self.screen.blit(textObj, textRect)
-
-    # def drawMoveLog(self, moveLog = []):
-    #     moveLogRect = pygame.Rect(BOARD_WIDTH + self.moveLogBorder, 0 + self.moveLogBorder, MOVELOG_WIDTH, BOARD_HEIGHT)
-    #     pygame.draw.rect(self.screen, self.moveLogBackgroundColor, moveLogRect)
-
-    #     moveText = []
-    #     for i in range(0, len(moveLog), 2):
-    #         moveString = str(i//2 + 1) + ". " + moveLog[i].getChessNotation() + " "
-    #         if (i + 1 < len(moveLog)):
-    #             moveString += moveLog[i + 1].getChessNotation() + "   "
-    #         moveText.append(moveString)
-
-    #     textY = self.moveLogPadding + self.textMoveSize
-    #     for i in range(0, len(moveLog), self.movePerRow):
-    #         chessNotationText = ""
-    #         for j in range(self.movePerRow):
-    #             if i + j < len(moveText): 
-    #                 chessNotationText += moveText[i + j]
-
-    #         moveLogTextObj = self.textMoveFont.render(chessNotationText, 1, pygame.Color("White"))
-    #         moveLogRect.move_ip(0, textY)
-    #         self.screen.blit(moveLogTextObj, moveLogRect)
-
-    # # Should only be initialized once during creation of class
+    # Should only be initialized once during creation of class
     def loadImages(self):
         """
             Loads required images for the chess piece

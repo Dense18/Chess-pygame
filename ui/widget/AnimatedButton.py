@@ -2,6 +2,9 @@ from ui.widget.Button import Button
 import pygame
 
 class AnimatedButton(Button):
+    """
+        Button with animated functionality
+    """
     def __init__(self, state, x, y, width, height, 
                  text = "", textSize = 50, textColor = (255,255,255),
                  color = (0,0,0), hoverColor = (255,0,0),

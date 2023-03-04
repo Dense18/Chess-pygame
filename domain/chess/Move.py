@@ -1,5 +1,8 @@
 
 class Move():
+    """
+        Stores the movement information of the Chess state, such as the pieceMoved, pieceCaptured, and enPassant
+    """
     rankToRow = {"1": 7, "2": 6, "3": 5, "4": 4, "5": 3, "6": 2, "7": 1, "8": 0}
     rowToRank = {value: key for key, value in rankToRow.items()}
 

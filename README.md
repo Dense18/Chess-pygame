@@ -25,7 +25,7 @@ Once an option is decided, the main chess screen will appear. By default, white 
 
 <img src = "examples/StartingChessScreen.png" width = 500>
 
-To identify the possible moves a chess Piece could make, click on the chess iece and the available moves will be highlighted in orange.
+To identify the possible moves a chess Piece could make, click on the chess Piece and the available moves will be highlighted in orange.
 
 <img src = "examples/HighlightedMove.png" width = 500>
 

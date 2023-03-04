@@ -2,12 +2,13 @@ import pygame
 from Observer import Observer
 
 class Button(Observer):
+    """
+        Creates a Button Widget inside a State Class
+    """
     def __init__(self, state, x, y, width, height, 
                  text = "", textSize = 50, textColor = (255,255,255),
                  color = (0,0,0), hoverColor = (255,0,0),
                  borderRadius = 12):
-        #self.game = game
-        # self.game.register(self)
         self.state = state
         self.state.register(self)
 

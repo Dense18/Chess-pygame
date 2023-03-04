@@ -1,21 +1,19 @@
 import numpy as np
 from domain.chess.Piece import *
 from domain.chess.Status import Status
-"""
-Responsible for managing all information regarding the state of the chess game.
-"""
+
 class GameState():
-    ONGOING = 1
-    CHECK = 2
-    CHECKMATE = 3
-    STALEMATE = 4
+    """
+        Class Responsible for managing all information regarding the state of the chess game.
+    """
     def __init__(self):
-        """
-        Board is an 8x8 2d list
-        Each element consist of 2 characters
-           1st character - denotes the color of pieces (w - White, b- Black)
-           2nd character - denotes the pieces itself (R - Rook, N - Night, B - Bishop, Q - Queen, K - King)
-        """
+                
+        # """
+        # Board is an 8x8 2d list
+        # Each element consist of 2 characters
+        #    1st character - denotes the color of pieces (w - White, b- Black)
+        #    2nd character - denotes the pieces itself (R - Rook, N - Night, B - Bishop, Q - Queen, K - King)
+        # """"
         self.board = np.array([
             ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
             ["bP","bP","bP","bP","bP","bP","bP","bP"],

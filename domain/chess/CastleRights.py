@@ -1,5 +1,8 @@
 ## TODO: Implement this functionality to the Chess Engine
 class CastleRights:
+    """
+        Information regarding the chess Castle Rights
+    """
     def __init__(self, whiteKingSide = True, whiteQueenSide = True, blackKingSide = True, blackQueenSide = True):
         self.whiteKingSide = whiteKingSide
         self.whiteQueenSide = whiteQueenSide

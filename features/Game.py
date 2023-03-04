@@ -13,6 +13,7 @@ class Game(Subject):
         pygame.init()
         self.running = True
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_caption("Chess pygame")
         self.dt, self.prevTime = 0, 0
         self.stateStack = []
         self.events = None

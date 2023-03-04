@@ -1,7 +1,7 @@
 ## Chess pygame
 Chess game using pygame. Fuctionalites include:
 - vs Player
-- vs Computer
+- vs Computer (MinMax/NegaMax with alpha-beta pruning)
 
 # Required installation
 ```python

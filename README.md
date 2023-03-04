@@ -50,7 +50,7 @@ The Notation is as follows:
 
 - Basic Move: [Piece Moved][Start Location][End Location]
 
-- Capture Move: [Piece Moved][Start Location][End Location]x[PieceCaptured][Piece Captured Position]
+- Capture Move: [Piece Moved][Start Location]x[PieceCaptured][Piece Captured Position]
 
 where PieceMoved = 
 

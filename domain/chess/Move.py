@@ -1,4 +1,4 @@
-
+from domain.chess.CastleRights import CastleRights
 class Move():
     """
         Stores the movement information of the Chess state, such as the pieceMoved, pieceCaptured, and enPassant
@@ -13,7 +13,7 @@ class Move():
 
     def __init__(self, startLocation, endLocation, board, 
                  piecePromotion = None,  isEnPassant = False, 
-                 prevEnPassantSquare = None,
+                 prevEnPassantSquare = None, prevCastleMoveRights = None,
                  status = None): #location in terms of (row,col)
         
         self.startRow = startLocation[0]
@@ -33,6 +33,11 @@ class Move():
         self.setEnPassant(isEnPassant)
         if prevEnPassantSquare != None: self.verifyEnPassant(prevEnPassantSquare)
         self.checkEnPassantSquare()
+
+        # Castle Rights
+        self.castleRights = CastleRights.copy(prevCastleMoveRights) if prevCastleMoveRights != None else CastleRights()
+        self.updateCastleRight()
+        self.isCastleMove = self.isCastlingMove()
 
         self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
     
@@ -78,7 +83,24 @@ class Move():
         return self.pieceMoved[1] + self.getRankFile(self.startRow, self.startCol) + capturedNotation +\
               pieceCapturedNotation+ self.getRankFile(self.endRow, self.endCol)
     
+    """
+        Castle Rights
+    """
+    def updateCastleRight(self):
+        if self.pieceMoved[0] == "w":
+            if self.pieceMoved[1] == "K":
+                self.castleRights.setFalse("w")
+            elif self.pieceMoved[1] == "R":
+                self.castleRights.setCastleRookWhite(self.startRow, self.startCol)
+        
+        elif self.pieceMoved[0] == "b":
+            if self.pieceMoved[1] == "K":
+                self.castleRights.setFalse("b")
+            elif self.pieceMoved[1] == "R":
+                self.castleRights.setCastleRookBlack(self.startRow, self.startCol)
 
+    def isCastlingMove(self):
+        return (self.pieceMoved[1] == "K" and abs(self.endCol - self.startCol) > 1)
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Move): return self.moveID == other.moveID
@@ -88,5 +110,5 @@ class Move():
         isEnPassant = "True" if self.isEnPassant else "False"
         enPassantSquare = f"({self.enPassantSquare[0], self.enPassantSquare[1]})" if self.enPassantSquare != () else "None"
         return "Move: [" + self.getChessNotation() + ", piecePromotion = " + piecePromotion + ", isEnPassant = " +  isEnPassant + \
-            ", enPassantSquare = " + enPassantSquare + "]"
+            ", enPassantSquare = " + enPassantSquare + "]\n" + str(self.castleRights)
     

@@ -37,17 +37,17 @@ class GameState():
         #     ["--","--","--","--","--","--","--","--"]
         # ])
 
-        ## Check CastleRights
-        # self.board = np.array([
-        #     ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
-        #     ["bP","bP","bP","bP","bP","bP","bP","bP"],
-        #     ["--","--","--","--","--","--","--","--"],
-        #     ["--","--","--","--","--","--","--","--"],
-        #     ["--","--","--","--","--","--","--","--"],
-        #     ["--","--","--","--","--","--","--","--"],
-        #     ["wP","wP","wP","wP","wP","wP","wP","wP"],
-        #     ["wR", "--", "--", "--", "wK", "--", "--", "wR"]
-        # ])
+        # Check CastleRights
+        self.board = np.array([
+            ["bR", "--", "--", "--", "bK", "--", "--", "bR"],
+            ["bP","bP","--","bP","bP","bP","bP","bP"],
+            ["--","--","--","--","--","--","--","--"],
+            ["--","--","wQ","--","--","--","bQ","--"],
+            ["--","--","--","--","--","--","--","--"],
+            ["--","--","--","--","--","--","--","--"],
+            ["wP","wP","wP","wP","wP","wP","--","wP"],
+            ["wR", "--", "--", "--", "wK", "--", "--", "wR"]
+        ])
 
         self.whiteTurn = True
         self.status = Status.ONGOING
@@ -84,6 +84,15 @@ class GameState():
         ## Check EnPassant
         if move.isEnPassant: # and self.board[move.startRow][move.endCol][1] == "P" for added security but unnecessary condition
             self.board[move.startRow][move.endCol] = "--"
+        
+        ## Check castling
+        if move.isCastleMove:
+            if move.endCol - move.startCol == 2: #Kingside Castle
+                self.board[move.endRow][move.endCol - 1] = self.board[move.endRow][move.endCol + 1] #Rook Location
+                self.board[move.startRow][move.endCol + 1] = "--"
+            else: #Queenside Castle
+                self.board[move.endRow][move.endCol + 1] = self.board[move.endRow][move.endCol - 2] #Rook Location
+                self.board[move.endRow][move.endCol - 2] = "--"
 
         self.moveLog.append(move)  #log list of moves
 
@@ -92,11 +101,13 @@ class GameState():
     def movePiece(self, startLocation, endLocation, piecePromotion = None) -> bool:
         flag = False
         enPassantSquare = self.moveLog[-1].enPassantSquare if len(self.moveLog) != 0 else None
-        moveObject = Move(startLocation, endLocation, self.board, piecePromotion, prevEnPassantSquare = enPassantSquare)
+        castleRights = CastleRights.copy(self.moveLog[-1].castleRights) if len(self.moveLog) != 0 else None
+
+        moveObject = Move(startLocation, endLocation, self.board, piecePromotion, 
+                          prevEnPassantSquare = enPassantSquare,
+                          prevCastleMoveRights = castleRights)
         # if moveObject.isPawnPromotion() and moveObject.piecePromotion == None: moveObject.setPawnPromotion("Q")
         currentPiece = self.board[startLocation[0]][startLocation[1]]
-
-        print(f"endLocation = {endLocation}")
         
         #Not allowed to move opponent moving piece or missing piece
         if currentPiece == "--" or currentPiece[0] != self.currentPieceTurn(): return False
@@ -128,6 +139,14 @@ class GameState():
             if (lastMoveObj.isEnPassant):
                 self.board[lastMoveObj.endRow][lastMoveObj.endCol] = "--"
                 self.board[lastMoveObj.startRow][lastMoveObj.endCol] = lastMoveObj.pieceCaptured
+
+            if lastMoveObj.isCastleMove:
+                if lastMoveObj.endCol - lastMoveObj.startCol == 2: #Kingside Castle
+                    self.board[lastMoveObj.endRow][lastMoveObj.endCol + 1] = self.board[lastMoveObj.endRow][lastMoveObj.endCol - 1] #Rook Location
+                    self.board[lastMoveObj.startRow][lastMoveObj.endCol - 1] = "--"
+                else: #Queenside Castle
+                    self.board[lastMoveObj.endRow][lastMoveObj.endCol - 2] = self.board[lastMoveObj.endRow][lastMoveObj.endCol + 1] #Rook Location
+                    self.board[lastMoveObj.endRow][lastMoveObj.endCol + 1] = "--"
 
             if not fromCheck: self.updateCurrentStatus()
 

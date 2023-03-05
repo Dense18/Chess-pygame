@@ -1,6 +1,7 @@
 import domain.chess.ChessEngine as ChessEngine
 from typing import Tuple
 from domain.chess.Move import Move
+from domain.chess.CastleRights import CastleRights
 
 class Piece:
     """
@@ -139,6 +140,8 @@ class King(Piece):
     
     def getPossibleMoves(self, row: int, col: int):
         board = self.gamestate.board
+        castleRights = CastleRights.copy(self.gamestate.moveLog[-1].castleRights) if len(self.gamestate.moveLog) != 0 else CastleRights()
+
         possibleMoves = []
         allyPiece  = board[row][col][0]
 
@@ -148,5 +151,20 @@ class King(Piece):
             endCol = col + move[1]
             if (0 <= endRow <= 7 and 0 <= endCol <= 7):
                 endPiece = board[endRow][endCol]
-                if (endPiece[0] != allyPiece): possibleMoves.append(Move((row, col), (endRow, endCol), board))
+                if (endPiece[0] != allyPiece): 
+                    possibleMoves.append(Move((row, col), (endRow, endCol), board))
+        
+        ## Check castling move
+        if allyPiece == "w":
+            if row == 7 and col == 4:
+                if board[row][col + 1] == "--" and board[row][col + 2] == "--" and castleRights.whiteKingSide: #Kingside castle
+                    possibleMoves.append(Move((row, col), (row, col + 2), board))
+                if board[row][col - 1] == "--" and board[row][col - 2] == "--" and castleRights.whiteQueenSide: #Queenside Castle
+                    possibleMoves.append(Move((row, col), (row, col - 2), board))
+        if allyPiece == "b":
+            if row == 0 and col == 4:
+                if board[row][col + 1] == "--" and board[row][col + 2] == "--" and castleRights.blackKingSide: #Kingside castle
+                    possibleMoves.append(Move((row, col), (row, col + 2), board))
+                if board[row][col - 1] == "--" and board[row][col - 2] == "--" and castleRights.blackQueenSide: #Queenside Castle
+                    possibleMoves.append(Move((row, col), (row, col - 2), board))
         return possibleMoves

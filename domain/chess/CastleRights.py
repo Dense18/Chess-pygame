@@ -29,16 +29,16 @@ class CastleRights:
     def setCastleRookWhite(self, row, col):
         if row == 7:
             if col == 0:
-                self.castleRights.whiteQueenSide = False
+                self.whiteQueenSide = False
             elif col == 7:
-                self.castleRights.whiteKingSide = False
+                self.whiteKingSide = False
 
     def setCastleRookBlack(self, row, col):
-        if row == 7:
+        if row == 0:
             if col == 0:
-                self.castleRights.blackQueenSide = False
+                self.blackQueenSide = False
             elif col == 7:
-                self.castleRights.blackKingSide = False
+                self.blackKingSide = False
 
     def __str__(self) -> str:
         return f"[wks: {self.whiteKingSide}, wqs: {self.whiteQueenSide}, bks: {self.blackKingSide}, bqs: {self.blackQueenSide}]"

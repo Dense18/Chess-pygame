@@ -155,6 +155,7 @@ class King(Piece):
                     possibleMoves.append(Move((row, col), (endRow, endCol), board))
         
         ## Check castling move
+        ## TODO: Implement functionality of castleRights in which the spaces between two pieces should not be in check
         if allyPiece == "w":
             if row == 7 and col == 4:
                 if board[row][col + 1] == "--" and board[row][col + 2] == "--" and castleRights.whiteKingSide: #Kingside castle

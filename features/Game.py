@@ -3,7 +3,7 @@ import os
 import time
 from settings import *
 from features.menu.Menu import Menu
-from Subject import Subject
+from features.Subject import Subject
 
 class Game(Subject):
     """

@@ -1,5 +1,5 @@
 import pygame
-from Observer import Observer
+from ui.Observer import Observer
 
 class Button(Observer):
     """

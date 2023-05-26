@@ -1,4 +1,4 @@
-from Subject import Subject
+from features.Subject import Subject
 
 class State(Subject):
     """

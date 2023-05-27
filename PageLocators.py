@@ -8,3 +8,4 @@ class PageLocators :
     GAME_OVER_MODAL = (By.ID, "game-over-modal")
     BOARD = (By.ID, "board-vs-personalities")
     INITIAL_MODAL = (By.CLASS_NAME, "modal-first-time-button")
+    PROMOTION_WINDOW = (By.CLASS_NAME, "promotion-window")

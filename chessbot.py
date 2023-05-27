@@ -2,15 +2,19 @@ import re
 import time
 
 from selenium import webdriver
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.remote.webdriver import WebDriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
-
+from selenium.common.exceptions import TimeoutException
 from AI.ChessAI import ChessAI
 from domain.chess.ChessEngine import GameState
 from domain.chess.Move import Move
+
+from PageLocators import PageLocators
 website_to_custom = {
     "bp": "bP",
     "br": "bR", 
@@ -28,12 +32,12 @@ website_to_custom = {
 custom_to_website = {v: k for k, v in website_to_custom.items()}
 
 def main():
-    
     ai = ChessAI()
     url = "https://www.chess.com/play/computer"
     driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(url)
     driver.maximize_window()
+    
     
     removeInitialPopUp(driver)
     
@@ -60,49 +64,53 @@ def main():
             print("Game Over")
             time.sleep(9)
             break
-        
+    
     driver.quit()
     
 """
     driver functions 
 """
-def removeInitialPopUp(driver: webdriver):
+def removeInitialPopUp(driver: WebDriver):
     try:
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "modal-first-time-button"))
+            EC.presence_of_element_located(PageLocators.INITIAL_MODAL)
         )
-        elem = driver.find_element(By.CLASS_NAME, "modal-first-time-button").find_element(By.TAG_NAME, "button")
+        elem = driver.find_element(*PageLocators.INITIAL_MODAL).find_element(By.TAG_NAME, "button")
         elem.click()
-    except TimeoutError:
+    except TimeoutException:
+        print("Wassup hoimie")
         return 
 
 
-def obtainBoard(driver: webdriver):
+def obtainBoard(driver: WebDriver):
     WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.ID, "board-vs-personalities"))
+        EC.presence_of_element_located(PageLocators.BOARD)
     )
-    board_element = driver.find_element(By.ID, "board-vs-personalities")
+    board_element = driver.find_element(*PageLocators.BOARD)
     pieces_element = board_element.find_elements(By.CLASS_NAME, "piece")
+    
     board = [["--" for _ in range(8)] for _ in range(8)]
-    
-    
     for piece_element in pieces_element:
-        piece_info = piece_element.get_attribute("class")
-        
-
-        pattern = r"piece ([a-z]{2}) square-([1-9]{2})"
-        m = re.search(pattern, piece_info)
-        if m is None: continue
-        
-        piece_type, position = m[1], m[2]
-        
-        row, col = convertPosition(position)
-        board[row][col] = website_to_custom[piece_type]
+        piece_type, (row, col) = getPieceInfoFromElement(piece_element)
+        if piece_type == None:
+            continue
+        board[row][col] = piece_type
 
     return board
 
+def getPieceInfoFromElement(piece_element: WebElement):
+    piece_info = piece_element.get_attribute("class")
+    print(piece_info)
+        
+    pattern = r"piece ([a-z]{2}) square-([1-9]{2})"
+    m = re.search(pattern, piece_info)
+    if m == None: 
+        return None, (None, None)
+    
+    piece_type, position = m[1], m[2]
+    return website_to_custom[piece_type], convertPosition(position)
 
-def applyMoveToWebsite(driver: webdriver, move: Move):
+def applyMoveToWebsite(driver: WebDriver, move: Move):
     ## Currently, using hint to move the piece
     ## Alternative: Try to automate mouse movement
     
@@ -140,21 +148,34 @@ def applyMoveToWebsite(driver: webdriver, move: Move):
     action.move_to_element(moveElement).click().perform()
     print("Finished action chain")
     
+    checkForPromotion(driver)
+    
     beautify(obtainBoard(driver))
 
-
-def waitForOpponentMove(driver: webdriver):
+def checkForPromotion(driver: WebDriver):
+    try:
+        WebDriverWait(driver,1).until(
+            EC.visibility_of_element_located(PageLocators.PROMOTION_WINDOW)
+        )
+        promotion_window = driver.find_element(*PageLocators.PROMOTION_WINDOW)
+        piece_element = promotion_window.find_elements(By.CLASS_NAME, "wq")
+        piece_element.click()
+        print("Promotion!")
+    except TimeoutException:
+        return
+    
+def waitForOpponentMove(driver: WebDriver):
     board = obtainBoard(driver)
     WebDriverWait(driver, 10).until(
         lambda driver: hasOpponentMoved(driver, board)
     )
 
-def isGameOver(driver: webdriver) -> bool:
-    game_over_element = driver.find_element(By.ID, "game-over-modal")
+def isGameOver(driver: WebDriver) -> bool:
+    game_over_element = driver.find_element(*PageLocators.GAME_OVER_MODAL)
     return game_over_element.get_attribute("innerHTML") != ""
 
-def hasOpponentMoved(driver: webdriver, board: list[list[str]]) -> bool:
-    highlight_elements = driver.find_elements(By.CLASS_NAME, "highlight")
+def hasOpponentMoved(driver: WebDriver, board: list[list[str]]) -> bool:
+    highlight_elements = driver.find_elements(*PageLocators.HIGHLIGHT)
     """
         Make sure not to touch the screen, or undo your own highlight
     """
@@ -163,19 +184,24 @@ def hasOpponentMoved(driver: webdriver, board: list[list[str]]) -> bool:
     
     
     for element in highlight_elements:
-        highlight_info = element.get_attribute("class")
-        pattern = r"highlight square-([1-9]{2})"
-        match = re.search(pattern, highlight_info)
-        if match == None:
+        row, col = getHighlightPosition(element)
+        if row == None or col == None:
             return False
-        
-        position = match[1]
-        row, col = convertPosition(position)
         
         if board[row][col][0] == "b":
             return True
         
     return False
+
+def getHighlightPosition(highlight_element: WebElement):
+    highlight_info = highlight_element.get_attribute("class")
+    pattern = r"highlight square-([1-9]{2})"
+    match = re.search(pattern, highlight_info)
+    if match == None:
+        return None, None
+    
+    position = match[1]
+    return convertPosition(position)
     
 """
     A.I Move    
@@ -193,7 +219,7 @@ def generateAIMove(board: list[list[str]], ai: ChessAI) -> Move:
 """
 Utility       
 """
-def beautify(board):
+def beautify(board: list[list[str]]):
     for row in board:
         print(row)        
         

@@ -110,5 +110,5 @@ class Move():
         isEnPassant = "True" if self.isEnPassant else "False"
         enPassantSquare = f"({self.enPassantSquare[0], self.enPassantSquare[1]})" if self.enPassantSquare != () else "None"
         return "Move: [" + self.getChessNotation() + ", piecePromotion = " + piecePromotion + ", isEnPassant = " +  isEnPassant + \
-            ", enPassantSquare = " + enPassantSquare + "]\n" + str(self.castleRights)
+            ", enPassantSquare = " + enPassantSquare + "]\n" #+ str(self.castleRights)
     

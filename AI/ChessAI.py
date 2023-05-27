@@ -3,9 +3,10 @@ from domain.chess.Status import Status
 from domain.chess.ChessEngine import ChessEngine
 from AI.PositionScore import *
 import time
+import math
 
 class ChessAI:
-    CHECKMATE_VALUE = 100
+    CHECKMATE_VALUE = math.inf #math
     STALEMATE_VALUE = 0
 
     def __init__(self) -> None:
@@ -201,10 +202,10 @@ class ChessAI:
         """
             Higher points -> White advantage
         """
-        # if gameState.status == Status.CHECKMATE: 
-        #     return self.CHECKMATE_VALUE if gameState.whiteTurn else - self.CHECKMATE_VALUE
-        # elif gameState.status == Status.STALEMATE:
-        #     return self.CHECKMATE_VALUE
+        if gameState.status == Status.CHECKMATE: 
+            return self.CHECKMATE_VALUE if gameState.whiteTurn else - self.CHECKMATE_VALUE
+        elif gameState.status == Status.STALEMATE:
+            return self.STALEMATE_VALUE
         
         return self.evaluateBasedOnNumPiece(gameState.board)
 

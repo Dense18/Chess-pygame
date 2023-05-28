@@ -10,12 +10,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+
 from AI.ChessAI import ChessAI
 from domain.chess.ChessEngine import GameState
 from domain.chess.Move import Move
 
 from PageLocators import PageLocators
-website_to_custom = {
+webPiece_to_customPiece = {
     "bp": "bP",
     "br": "bR", 
     "bn": "bN",
@@ -29,15 +32,11 @@ website_to_custom = {
     "wq": "wQ",
     "wk": "wK",
 }
-custom_to_website = {v: k for k, v in website_to_custom.items()}
+customPiece_to_webPiece = {v: k for k, v in webPiece_to_customPiece.items()}
 
 def main():
     ai = ChessAI()
-    url = "https://www.chess.com/play/computer"
-    driver = webdriver.Chrome(ChromeDriverManager().install())
-    driver.get(url)
-    driver.maximize_window()
-    
+    driver = setUpDriver()
     
     removeInitialPopUp(driver)
     
@@ -51,9 +50,10 @@ def main():
         print("Applying Move")
         applyMoveToWebsite(driver, moveObj)
         
+        print("Checking Game Over")
         if isGameOver(driver):
             print("Game Over")
-            time.sleep(9)
+            time.sleep(100)
             break
         
         print("Waiting for opponent")
@@ -62,7 +62,7 @@ def main():
         
         if isGameOver(driver):
             print("Game Over")
-            time.sleep(9)
+            time.sleep(100)
             break
     
     driver.quit()
@@ -70,6 +70,19 @@ def main():
 """
     driver functions 
 """
+
+def setUpDriver() -> WebDriver:
+    url = "https://www.chess.com/play/computer"
+    
+    options = Options()
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver.get(url)
+    driver.maximize_window() 
+    
+    return driver
+
 def removeInitialPopUp(driver: WebDriver):
     try:
         WebDriverWait(driver, 10).until(
@@ -100,7 +113,6 @@ def obtainBoard(driver: WebDriver):
 
 def getPieceInfoFromElement(piece_element: WebElement):
     piece_info = piece_element.get_attribute("class")
-    print(piece_info)
         
     pattern = r"piece ([a-z]{2}) square-([1-9]{2})"
     m = re.search(pattern, piece_info)
@@ -108,14 +120,14 @@ def getPieceInfoFromElement(piece_element: WebElement):
         return None, (None, None)
     
     piece_type, position = m[1], m[2]
-    return website_to_custom[piece_type], convertPosition(position)
+    return webPiece_to_customPiece[piece_type], convertPosition(position)
 
 def applyMoveToWebsite(driver: WebDriver, move: Move):
     ## Currently, using hint to move the piece
     ## Alternative: Try to automate mouse movement
     
     startPosition = f"{move.startCol + 1}{8 - move.startRow}"     #Website Format 
-    pieceMoved = custom_to_website[move.pieceMoved]
+    pieceMoved = customPiece_to_webPiece[move.pieceMoved]
     moving_piece_tag  = f"piece.{pieceMoved}.square-{startPosition}"
     print("starting piece: ", moving_piece_tag)
     
@@ -130,7 +142,7 @@ def applyMoveToWebsite(driver: WebDriver, move: Move):
     
     
     if move.pieceCaptured != "--":
-        moving_position_tag = f"piece.{custom_to_website[move.pieceCaptured]}.square-{endPosition}"
+        moving_position_tag = f"piece.{customPiece_to_webPiece[move.pieceCaptured]}.square-{endPosition}"
     else:
         moving_position_tag = f"hint.square-{endPosition}"
         
@@ -148,9 +160,13 @@ def applyMoveToWebsite(driver: WebDriver, move: Move):
     action.move_to_element(moveElement).click().perform()
     print("Finished action chain")
     
-    checkForPromotion(driver)
+    if move.endRow == 7 and move.pieceMoved == "wP": #end of chess Piece
+        print("Promotion Move!")
+        checkForPromotion(driver)
     
+    print("printing board after movement")
     beautify(obtainBoard(driver))
+    print("Done movement")
 
 def checkForPromotion(driver: WebDriver):
     try:
@@ -176,6 +192,8 @@ def isGameOver(driver: WebDriver) -> bool:
 
 def hasOpponentMoved(driver: WebDriver, board: list[list[str]]) -> bool:
     highlight_elements = driver.find_elements(*PageLocators.HIGHLIGHT)
+    
+    print(f"Num of Highlight elements: {len(highlight_elements)}")
     """
         Make sure not to touch the screen, or undo your own highlight
     """

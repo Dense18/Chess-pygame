@@ -52,8 +52,6 @@ def main():
         
         print("Checking Game Over")
         if isGameOver(driver):
-            print("Game Over")
-            time.sleep(100)
             break
         
         print("Waiting for opponent")
@@ -61,10 +59,10 @@ def main():
         print("Opponent have moved")
         
         if isGameOver(driver):
-            print("Game Over")
-            time.sleep(100)
             break
     
+    print("Game Over")
+    time.sleep(100)
     driver.quit()
     
 """
@@ -91,9 +89,7 @@ def removeInitialPopUp(driver: WebDriver):
         elem = driver.find_element(*PageLocators.INITIAL_MODAL).find_element(By.TAG_NAME, "button")
         elem.click()
     except TimeoutException:
-        print("Wassup hoimie")
         return 
-
 
 def obtainBoard(driver: WebDriver):
     WebDriverWait(driver, 10).until(
@@ -170,7 +166,7 @@ def applyMoveToWebsite(driver: WebDriver, move: Move):
 
 def checkForPromotion(driver: WebDriver):
     try:
-        WebDriverWait(driver,1).until(
+        WebDriverWait(driver,10).until(
             EC.visibility_of_element_located(PageLocators.PROMOTION_WINDOW)
         )
         promotion_window = driver.find_element(*PageLocators.PROMOTION_WINDOW)
@@ -201,15 +197,21 @@ def hasOpponentMoved(driver: WebDriver, board: list[list[str]]) -> bool:
         return False
     
     
-    for element in highlight_elements:
-        row, col = getHighlightPosition(element)
-        if row == None or col == None:
-            return False
+    # for element in highlight_elements:
+    #     row, col = getHighlightPosition(element)
+    #     if row == None or col == None:
+    #         return False
         
-        if board[row][col][0] == "b":
-            return True
-        
-    return False
+    #     if board[row][col][0] == "b":
+    #         return True
+    # return False
+    return any(map(lambda element: checkHighlightPieceColor(element, board, "b"), highlight_elements))     
+    
+def checkHighlightPieceColor(highlight_element: WebElement, board: list[list[str]], pieceColor: str):
+    row, col = getHighlightPosition(highlight_element)
+    if row == None or col == None:
+        return False
+    return board[row][col][0] == pieceColor
 
 def getHighlightPosition(highlight_element: WebElement):
     highlight_info = highlight_element.get_attribute("class")

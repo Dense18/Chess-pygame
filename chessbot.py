@@ -70,6 +70,9 @@ def main():
 """
 
 def setUpDriver() -> WebDriver:
+    """
+    Sets up the WebDriver 
+    """
     url = "https://www.chess.com/play/computer"
     
     options = Options()
@@ -82,6 +85,9 @@ def setUpDriver() -> WebDriver:
     return driver
 
 def removeInitialPopUp(driver: WebDriver):
+    """
+    Close the initial popup window from chess.com
+    """
     try:
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(PageLocators.INITIAL_MODAL)
@@ -92,6 +98,9 @@ def removeInitialPopUp(driver: WebDriver):
         return 
 
 def obtainBoard(driver: WebDriver):
+    """
+    Returns the current board state of the chess board from the website
+    """
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located(PageLocators.BOARD)
     )
@@ -107,8 +116,12 @@ def obtainBoard(driver: WebDriver):
 
     return board
 
-def getPieceInfoFromElement(piece_element: WebElement):
-    piece_info = piece_element.get_attribute("class")
+def getPieceInfoFromElement(pieceElement: WebElement):
+    """
+    Parses the piece information based on the [pieceElement].
+    Returns in (pieceType, (pieceRow, pieceCol)) format
+    """
+    piece_info = pieceElement.get_attribute("class")
         
     pattern = r"piece ([a-z]{2}) square-([1-9]{2})"
     m = re.search(pattern, piece_info)
@@ -118,11 +131,11 @@ def getPieceInfoFromElement(piece_element: WebElement):
     piece_type, position = m[1], m[2]
     return webPiece_to_customPiece[piece_type], convertPosition(position)
 
-def applyMoveToWebsite(driver: WebDriver, move: Move):
-    ## Currently, using hint to move the piece
-    ## Alternative: Try to automate mouse movement
-    
-    startPosition = f"{move.startCol + 1}{8 - move.startRow}"     #Website Format 
+def applyMoveToWebsite(driver: WebDriver, move: Move):    
+    """
+    Applies a piece move to the website based on the [move] Object
+    """
+    startPosition = f"{move.startCol + 1}{8 - move.startRow}"     
     pieceMoved = customPiece_to_webPiece[move.pieceMoved]
     moving_piece_tag  = f"piece.{pieceMoved}.square-{startPosition}"
     print("starting piece: ", moving_piece_tag)
@@ -164,59 +177,65 @@ def applyMoveToWebsite(driver: WebDriver, move: Move):
     beautify(obtainBoard(driver))
     print("Done movement")
 
-def checkForPromotion(driver: WebDriver):
+def checkForPromotion(driver: WebDriver, piece = "wP"):
+    """
+    Identify if a promotion window is available, and chooses the [piece] option if available
+    """
     try:
         WebDriverWait(driver,10).until(
             EC.visibility_of_element_located(PageLocators.PROMOTION_WINDOW)
         )
         promotion_window = driver.find_element(*PageLocators.PROMOTION_WINDOW)
-        piece_element = promotion_window.find_elements(By.CLASS_NAME, "wq")
+        piece_element = promotion_window.find_elements(By.CLASS_NAME, piece)
         piece_element.click()
         print("Promotion!")
     except TimeoutException:
         return
     
 def waitForOpponentMove(driver: WebDriver):
+    """
+    Blocking function that waits for the opponent to make a move
+    """
     board = obtainBoard(driver)
     WebDriverWait(driver, 10).until(
         lambda driver: hasOpponentMoved(driver, board)
     )
 
 def isGameOver(driver: WebDriver) -> bool:
+    """
+    Checks if the current game has ended
+    """
     game_over_element = driver.find_element(*PageLocators.GAME_OVER_MODAL)
     return game_over_element.get_attribute("innerHTML") != ""
 
 def hasOpponentMoved(driver: WebDriver, board: list[list[str]]) -> bool:
+    """
+        Checks if an opponent has made a move
+    """
     highlight_elements = driver.find_elements(*PageLocators.HIGHLIGHT)
     
     print(f"Num of Highlight elements: {len(highlight_elements)}")
-    """
-        Make sure not to touch the screen, or undo your own highlight
-    """
     if len(highlight_elements) != 2:
         return False
     
-    
-    # for element in highlight_elements:
-    #     row, col = getHighlightPosition(element)
-    #     if row == None or col == None:
-    #         return False
-        
-    #     if board[row][col][0] == "b":
-    #         return True
-    # return False
     return any(map(lambda element: checkHighlightPieceColor(element, board, "b"), highlight_elements))     
     
-def checkHighlightPieceColor(highlight_element: WebElement, board: list[list[str]], pieceColor: str):
-    row, col = getHighlightPosition(highlight_element)
+def checkHighlightPieceColor(highlightElement: WebElement, board: list[list[str]], pieceColor: str):
+    """
+    Identify if the highlighted piece based on the [highlightElement] is the same as the given [pieceColor]
+    """
+    row, col = getHighlightPosition(highlightElement)
     if row == None or col == None:
         return False
     return board[row][col][0] == pieceColor
 
-def getHighlightPosition(highlight_element: WebElement):
-    highlight_info = highlight_element.get_attribute("class")
+def getHighlightPosition(highlightElement: WebElement):
+    """
+        Returns the position in the correct format obtained from the [highlightElement]
+    """
+    highlightInfo = highlightElement.get_attribute("class")
     pattern = r"highlight square-([1-9]{2})"
-    match = re.search(pattern, highlight_info)
+    match = re.search(pattern, highlightInfo)
     if match == None:
         return None, None
     
@@ -227,6 +246,9 @@ def getHighlightPosition(highlight_element: WebElement):
     A.I Move    
 """
 def generateAIMove(board: list[list[str]], ai: ChessAI) -> Move:
+    """
+        Generate a Move Object based on the given [board] and [ai] engine
+    """
     gameState = GameState()
     gameState.board = board
     gameState.whiteTurn = True
@@ -240,10 +262,16 @@ def generateAIMove(board: list[list[str]], ai: ChessAI) -> Move:
 Utility       
 """
 def beautify(board: list[list[str]]):
+    """
+    Prints a formatted board state to the console
+    """
     for row in board:
         print(row)        
         
 def convertPosition(position: str) -> tuple[int, int]:
+    """
+    Convert the piece position from the website page source to the correct format used by this application
+    """
     col = int(position[0]) - 1
     row = 8 - int(position[1])
     return row, col

@@ -4,7 +4,6 @@ import time
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.remote.webdriver import WebDriver
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -176,10 +175,10 @@ class ChessAutomation:
         Identify if a promotion window is available, and chooses the [piece] option if available
         """
         try:
-            WebDriverWait(driver,10).until(
+            WebDriverWait(self.driver,10).until(
                 EC.visibility_of_element_located(PageLocators.PROMOTION_WINDOW)
             )
-            promotion_window = driver.find_element(*PageLocators.PROMOTION_WINDOW)
+            promotion_window = self.driver.find_element(*PageLocators.PROMOTION_WINDOW)
             piece_element = promotion_window.find_elements(By.CLASS_NAME, piece)
             piece_element.click()
             print("Promotion!")

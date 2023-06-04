@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 
 class PageLocators :
     """
-    Class storing Page Locators 
+    Class storing Page Locators for chess.com
     """
     HIGHLIGHT = (By.CLASS_NAME, "highlight")
     GAME_OVER_MODAL = (By.ID, "game-over-modal")

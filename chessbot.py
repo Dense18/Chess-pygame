@@ -17,7 +17,7 @@ from AI.ChessAI import ChessAI
 from domain.chess.ChessEngine import GameState
 from domain.chess.Move import Move
 
-from PageLocators import PageLocators
+from bot.PageLocators import PageLocators
 webPiece_to_customPiece = {
     "bp": "bP",
     "br": "bR", 

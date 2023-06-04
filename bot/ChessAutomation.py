@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
 
+from typing import Protocol
 from AI.ChessAI import ChessAI
 from domain.chess.ChessEngine import GameState
 from domain.chess.Move import Move
@@ -32,11 +33,15 @@ webPiece_to_customPiece = {
     }
 customPiece_to_webPiece = {v: k for k, v in webPiece_to_customPiece.items()}
 
+class AiBot(Protocol):
+    def generatemove(*args, **kwargs) -> Move:
+        ...
+        
 class ChessAutomation:
     """
     Automates a chess bot battle on chess.com
     """
-    def __init__(self, driver: WebDriver, ai: ChessAI) -> None:
+    def __init__(self, driver: WebDriver, ai: AiBot) -> None:
         self.driver = driver
         self.ai = ai
         

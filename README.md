@@ -1,18 +1,25 @@
-## Chess pygame
+# Chess pygame
 Chess game using pygame. Fuctionalites include:
 - vs Player
 - vs Computer (MinMax/NegaMax with alpha-beta pruning)
 
-# Required installation
+Added on 1 June 2023:
+- Added chess bot automation for chess.com
+
+## Required installation
 ```python
 pip install pygame
+pip install selenium
+pip install webdriver-manager
 ```
-# Running the Program
+## Running the Program
 ```python
-py main.py
+py main.py # Main Chess Application
+py mainbot.py # Bot automation on chess.com
 ```
 
-## Description 
+# Description 
+## main.py
 When the program is opened, the user will be given options to battle against another player (locally), or against an AI.
 
 <img src = "examples/MenuScreen.png" width = 500>
@@ -61,6 +68,13 @@ where PieceMoved =
  - **Q** : *Queen*
  - **K** : *King*
 
+## mainbot.py
+Once the file is executed, a new google chrome instance will be created heading to chess.com
+
+<img src = "examples/chesscom.png" width = 500>
+
+Once the page is loaded, it will automatically battle one of the chess bots available on the websites. When the game has ended, there will be a delay of 100 seconds before the program ends.
+
 # Controls:
 
 **Left Click** - Select and Move a chess Piece 
@@ -74,7 +88,7 @@ where PieceMoved =
 **Esc** - Exit the current Chess game
 
 ---
-## Additional information
+# Additional information
 The program uses MinMax and NegaMax variant with alpha-beta pruning as the thought process. By default, the AI can think two steps ahead. 
 This can be changed by changing the depth, but higher depth would increase time taken for the A.I to make a decision exponentially.
 

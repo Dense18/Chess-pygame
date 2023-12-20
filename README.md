@@ -12,12 +12,13 @@ pip install pygame
 pip install selenium
 pip install webdriver-manager
 ```
+
+Please ensure your Google Chrome is on the latest version before running the chess bot automation program
 ## Running the Program
 ```python
 py main.py # Main Chess Application
 py mainbot.py # Bot automation on chess.com
 ```
-
 # Description 
 ## main.py
 When the program is opened, the user will be given options to battle against another player (locally), or against an AI.
